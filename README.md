@@ -1,7 +1,7 @@
 pat
 ===
 
-![License](http://img.shields.io/badge/license-MIT-red.svg)](https://github.com/KoffeinFlummi/pat/blob/master/LICENSE)
+[![License](http://img.shields.io/badge/license-MIT-red.svg)](https://github.com/KoffeinFlummi/pat/blob/master/LICENSE)
 
 Show images in your terminal!
 
