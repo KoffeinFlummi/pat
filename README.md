@@ -1,7 +1,7 @@
 pat
 ===
 
-![License](http://img.shields.io/badge/license-MIT-red.svg)](https://github.com/KoffeinFlummi/pat/blob/master/LICENSE)
+[![License](http://img.shields.io/badge/license-MIT-red.svg)](https://github.com/KoffeinFlummi/pat/blob/master/LICENSE)
 
 Show images in your terminal!
 
@@ -27,3 +27,5 @@ $ pat [pathtofile1] [pathtofile2] ...
 ```
 
 Supports whatever file types your PIL/pillow installation can handle.
+
+![Kitteh](http://i.imgur.com/zBRiLYH.png)
