@@ -116,12 +116,14 @@ def main(args):
         print("  Usage: pat [pathtofile1] [pathtofile2] ...")
         return 1
 
+    errors = 0
     for p in args:
         try:
             show_picture(p)
         except:
             print("Failed to load {}".format(p))
-            return 2
+            errors = errors + 1
+    return errors
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
