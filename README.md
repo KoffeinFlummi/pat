@@ -27,3 +27,5 @@ $ pat [pathtofile1] [pathtofile2] ...
 ```
 
 Supports whatever file types your PIL/pillow installation can handle.
+
+![Kitteh](http://i.imgur.com/zBRiLYH.png)
