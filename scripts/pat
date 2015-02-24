@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+
+import os
+import shutil
+import sys
+import struct
+
+from PIL import Image
+
+
+LOOKUP = {
+    '5f5fd7': '62', '87d75f': '113', '5f8787': '66', 'ff5fd7': '206', '080808': '232', 'ff87af': '211',
+    '875faf': '97', '0000ff': '12', '121212': '233', '5fd787': '78', '5fafd7': '74', '005f5f': '23',
+    '00ff87': '48', '005faf': '25', '949494': '246', 'ff87ff': '213', '00d75f': '41', 'd70000': '160',
+    'd70087': '162', '00875f': '29', '0087d7': '32', 'afff87': '156', '5faf00': '70', '00d700': '40',
+    'afd700': '148', 'af5fd7': '134', 'af87d7': '140', '870000': '88', 'ff5faf': '205', 'af5f00': '130',
+    '5fffff': '87', 'af5f87': '132', 'ff5f00': '202', 'd7ff5f': '191', 'ffffff': '231', '767676': '243',
+    'bcbcbc': '250', 'ff5f87': '204', 'd7afd7': '182', 'd7af5f': '179', '262626': '235', 'afffd7': '158',
+    '8787ff': '105', 'd7d7af': '187', 'afd7ff': '153', '875f5f': '95', 'd7d700': '184', '870087': '90',
+    'd7d787': '186', 'af00af': '127', 'afaf5f': '143', '87d7ff': '117', '5f8700': '64', 'ff00d7': '200',
+    'ffd7d7': '224', '00afff': '39', 'ffd787': '222', 'd7af00': '178', 'd7005f': '161', '87ff87': '120',
+    'd75fff': '171', 'afafaf': '145', 'afd787': '150', 'ff5fff': '207', '87afff': '111', '5fd75f': '77',
+    '87ffd7': '122', 'd7875f': '173', '875f87': '96', '00ffd7': '50', 'af5fff': '135', 'af8787': '138',
+    'afaf87': '144', 'd75f5f': '167', 'af00ff': '129', 'af8700': '136', '87afaf': '109', 'd700d7': '164',
+    'ffff87': '228', '87ff00': '118', 'ffff5f': '227', '8700af': '91', '00ff00': '46', 'ff00ff': '13',
+    '5fff00': '82', 'ffd7ff': '225', '0087af': '31', '87af5f': '107', 'd0d0d0': '252', '5f5faf': '61',
+    '87d7af': '115', '1c1c1c': '234', 'afff5f': '155', 'c0c0c0': '07', '5fafff': '75', '00d7af': '43',
+    'ffd75f': '221', '008080': '06', '875fff': '99', '5f5fff': '63', '87875f': '101', '5fd7ff': '81',
+    '8787af': '103', 'd75faf': '169', 'c6c6c6': '251', '5f005f': '53', '6c6c6c': '242', 'd7d7d7': '188',
+    '5f00af': '55', 'afafd7': '146', '8700ff': '93', 'afaf00': '142', 'ff875f': '209', '5fd7af': '79',
+    'd787af': '175', '0087ff': '33', 'dadada': '253', '444444': '238', 'e4e4e4': '254', 'b2b2b2': '249',
+    '808080': '244', 'ffafff': '219', '5fff87': '84', '5fff5f': '83', '5f87ff': '69', '5fffaf': '85',
+    '00afaf': '37', '875fd7': '98', '87ffaf': '121', '5fd7d7': '80', 'ffafd7': '218', '5fffd7': '86',
+    '87d700': '112', '00ff5f': '47', '800000': '01', 'ffaf00': '214', '808000': '03', '800080': '05',
+    '005fff': '27', 'd700af': '163', '00af00': '34', '8700d7': '92', '5f00ff': '57', '87ff5f': '119',
+    '875f00': '94', '00af87': '36', 'a8a8a8': '248', 'd7ffd7': '194', '5faf5f': '71', 'd7d7ff': '189',
+    '5fafaf': '73', '5f87af': '67', 'afffaf': '157', 'd75f87': '168', '626262': '241', '87afd7': '110',
+    '87ffff': '123', '00ffff': '14', '87005f': '89', '3a3a3a': '237', '9e9e9e': '247', 'd7ff00': '190',
+    '878700': '100', 'd75fd7': '170', '878787': '102', 'd7ff87': '192', '5f5f5f': '59', 'ff5f5f': '203',
+    'eeeeee': '255', '585858': '240', 'ffffaf': '229', 'af0087': '126', 'ffff00': '11', 'ffaf87': '216',
+    'd787d7': '176', 'af0000': '124', 'ffd7af': '223', '87d787': '114', '4e4e4e': '239', 'af00d7': '128',
+    'ff005f': '197', 'd700ff': '165', '008000': '02', '00005f': '17', '005f00': '22', 'd78700': '172',
+    '5fd700': '76', 'ff87d7': '212', '5f0000': '52', 'af87ff': '141', '008700': '28', 'ffaf5f': '215',
+    '0000af': '19', 'af005f': '125', '00ffaf': '49', '87af87': '108', '87d7d7': '116', '00d7ff': '45',
+    '87af00': '106', 'af87af': '139', 'd787ff': '177', 'af5f5f': '131', '005f87': '24', 'af875f': '137',
+    '00d787': '42', '8a8a8a': '245', 'd7afff': '183', '00af5f': '35', 'afffff': '159', '8787d7': '104',
+    'ffafaf': '217', '00afd7': '38', 'd75f00': '166', '008787': '30', '5faf87': '72', 'afafff': '147',
+    'afff00': '154', 'd7d75f': '185', 'af5faf': '133', '00d7d7': '44', 'afd7af': '151', 'ff0000': '196',
+    'afd7d7': '152', '5f5f87': '60', '303030': '236', 'd7ffaf': '193', '000087': '18', '5f87d7': '68',
+    '0000d7': '20', '000080': '04', 'afd75f': '149', '5f0087': '54', '5f00d7': '56', 'd78787': '174',
+    '000000': '16', 'ffd700': '220', 'd7afaf': '181', 'ff8787': '210', 'ffffd7': '230', 'd7ffff': '195',
+    '5f875f': '65', 'ff8700': '208', 'ff00af': '199', '5f5f00': '58', 'd7af87': '180', '005fd7': '26',
+    'ff0087': '198'
+}
+
+def colorize(string, parts):
+    # source: https://gist.github.com/MicahElliott/719710
+    incs = (0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff)
+    res = []
+    for part in parts:
+        i = 0
+        while i < len(incs)-1:
+            s, b = incs[i], incs[i+1]
+            if s <= part <= b:
+                s1 = abs(s - part)
+                b1 = abs(b - part)
+                if s1 < b1: closest = s
+                else: closest = b
+                res.append(closest)
+                break
+            i += 1
+    res = ''.join([('%02.x' % i) for i in res])
+    equiv = LOOKUP[res]
+    return '\033[38;5;{}m'.format(equiv) + string + "\033[0m"
+
+def show_picture(path):
+    cols, lines = shutil.get_terminal_size()
+    cols, lines = cols - 2, lines - 2
+
+    img = Image.open(path)
+
+    ratio = min(cols/img.size[0], lines/img.size[1]*2)
+    if ratio > 1:
+        ratio = 1
+
+    width = int(img.size[0] * ratio)
+    height = int(img.size[1] * ratio * 0.5)
+
+    img = img.resize((width, height), Image.ANTIALIAS)
+
+    chars = list(" .:!/#&@")
+    lines = []
+
+    data = img.load()
+    for i in range(height-1):
+        line = ""
+        for j in range(width-1):
+            p = data[j, i]
+            a = 255
+            if len(p) > 3:
+                a = p[3]
+            char = chars[int(a/255 * (len(chars)-1))]
+            rgb = p[0] * 65536 + p[1] * 256 + p[2]
+            line += colorize(char, p[:3])
+        lines.append(line)
+
+    padding = int(cols/2 - width/2)
+
+    print("")
+    for l in lines:
+        print(padding * " " + l)
+    print("")
+
+def main(args):
+    if len(args) == 0:
+        print("  Usage: pat [pathtofile1] [pathtofile2] ...")
+        return 1
+
+    for p in args:
+        try:
+            show_picture(p)
+        except:
+            print("Failed to load {}".format(p))
+            return 2
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
+
