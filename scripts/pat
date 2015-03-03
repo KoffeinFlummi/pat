@@ -74,7 +74,12 @@ def colorize(string, parts):
     return '\033[38;5;{}m'.format(equiv) + string + "\033[0m"
 
 def show_picture(path):
-    cols, lines = shutil.get_terminal_size()
+    try:
+        cols, lines = shutil.get_terminal_size()
+    except:
+        import subprocess
+        lines, cols = subprocess.check_output(["stty", "size"]).split()
+        lines, cols = int(lines), int(cols)
     cols, lines = cols - 2, lines - 2
 
     img = Image.open(path)
